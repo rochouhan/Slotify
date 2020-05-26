@@ -26,6 +26,17 @@ class Account
         }
     }
 
+    public function login($un, $pw)
+    {
+        $pw = md5($pw);
+        $query = mysqli_query($this->con, "SELECT * FROM users WHERE username='$un' AND password='$pw'");
+        if (mysqli_num_rows($query) == 1) {
+            return true;
+        } else {
+            array_push($this->errorArray, Constants::$loginFailed);
+            return false;
+        }
+    }
     public function getError($error)
     {
         if (!in_array($error, $this->errorArray)) {
@@ -54,8 +65,10 @@ class Account
             return;
         }
 
-        //TODO: check if username exists
-
+        $checkUsernameQuery = mysqli_query($this->con, "SELECT username FROM users WHERE username='$un'");
+        if (mysqli_num_rows($checkUsernameQuery) !== 0) {
+            array_push($this->errorArray, Constants::$usernameTaken);
+        }
     }
 
     private function validateFirstName($fn)
@@ -86,8 +99,10 @@ class Account
             return;
         }
 
-        //TODO: Check that username hasn't already been used
-
+        $checkEmailQuery = mysqli_query($this->con, "SELECT email FROM users WHERE email='$em'");
+        if (mysqli_num_rows($checkEmailQuery) !== 0) {
+            array_push($this->errorArray, Constants::$emailTaken);
+        }
     }
 
     private function validatePasswords($pw, $pw2)
